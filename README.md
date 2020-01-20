@@ -1,4 +1,4 @@
-# linux-pathing with Ansible
+# linux-patching with Ansible
 - Verify the Application or Database process are running or not.
 - Decision point to start patching.
 - Copy the required Repository file to the manage host.
