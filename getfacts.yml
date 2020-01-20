@@ -1,0 +1,43 @@
+---
+- name: Fact dump
+  hosts: "{{ group_name }}"
+  tasks:
+    - name: Print all facts
+      debug:
+        var: ansible_facts.date_time.date
+    - debug: 
+        var: ansible_facts.hostname
+    - debug:
+        var: ansible_facts.os_family
+    - debug:
+        var: ansible_facts.kernel
+    - debug:
+        var: ansible_facts.default_ipv4.address
+
+    - name: Create CSV
+      template:
+        src: ./files/csv.j2
+        dest: ./facts.csv
+
+    - name: fetch json to local
+      fetch: 
+        src: "/root/facts.csv"
+        dest: "/root/{{ inventory_hostname }}_facts.csv"
+        flat: yes
+
+- name: Merge File
+  hosts: localhost
+  become_method: sudo
+  gather_facts: no
+  tasks:
+  - name: delete old fact
+    shell: "rm -rf ./{{ group_name }}_fact.csv"
+
+  - name: Cat File
+    shell: "echo ip_address,hostname,kernel,os_family,date,time >> {{ group_name }}_fact.csv"
+
+  - name: Merge csv
+    shell: "cat /root/{{ item }}_facts.csv >> ./{{ group_name }}_fact.csv"
+    loop: "{{ query('inventory_hostnames', group_name) }}"
+    delegate_to: localhost
+    ignore_errors: no

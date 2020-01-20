@@ -1,0 +1,1 @@
+ansible-playbook getfacts.yml -e "group_name=clients"
